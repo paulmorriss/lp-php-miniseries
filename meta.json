@@ -1,6 +1,6 @@
 {
-  "name": "YOUR PUBLICATION TITLE HERE",
-  "description": "YOUR DESCRIPTION HERE",
+  "name": "Daily Weather",
+  "description": "Daily Weather from the BBC (not officially affiliated with the BBC)",
   "delivered_on": "every day",
   "owner_email": "publishers@bergcloud.com",
   "publication_api_version": "1.0",
