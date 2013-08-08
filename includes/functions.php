@@ -2,6 +2,7 @@
 // v1.0.2
 
 require 'config.php';
+require_once('../magpierss/rss_fetch.inc');
 
 
 /**
@@ -102,9 +103,20 @@ function lp_display_page() {
 		$edition_number = $EDITION_FOR_SAMPLE;
 		lp_etag_header('sample', $local_delivery_time);
 	}
+	$rss = fetch_rss("http://newsrss.bbc.co.uk/weather/forecast/4276/Next3DaysRSS.xml?area=HP12");
+	$weatherword = $rss->items[0]['title'];
+	$weatherword = substr($weatherword, strpos($weatherword,":")+2);
+	$weatherword = substr($weatherword, 0, strpos($weatherword, ","));
+	echo $weatherword;
+	lp_page_header();
 
+	require lp_directory_path().'includes/header.php';	
+	require lp_directory_path().'includes/footer.php';	
+
+	lp_page_footer();
+	
 	// Get the path of the image or file for this edition (if any).
-	$file_path_data = lp_get_edition_file_path($edition_number);
+/*	$file_path_data = lp_get_edition_file_path($edition_number);
 
 	if ($file_path_data === FALSE) {
 		// No edition is available for this edition_number. End the subscription.
@@ -128,6 +140,7 @@ function lp_display_page() {
 
 		lp_page_footer();
 	}
+	*/
 }
 
 
