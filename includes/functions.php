@@ -107,7 +107,7 @@ function lp_display_page() {
 	$weatherword = $rss->items[0]['title'];
 	$weatherword = substr($weatherword, strpos($weatherword,":")+2);
 	$weatherword = substr($weatherword, 0, strpos($weatherword, ","));
-	echo $weatherword;
+	echo file_get_contents(lp_directory_path().'editions/'.$weatherword.'.svg');
 	lp_page_header();
 
 	require lp_directory_path().'includes/header.php';	
