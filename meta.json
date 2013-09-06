@@ -6,6 +6,14 @@
   "publication_api_version": "1.0",
   "external_configuration": false,
   "send_timezone_info": true,
-  "send_delivery_count": true,
-  "config": {}
+  "send_delivery_count": false,
+  "config" : {
+      "fields": [
+          {
+              "type": "text",
+              "name": "postcode",
+              "label": "Please enter the first part of your postcode, e.g. HP12 (UK only)"
+          }
+	]
+  }
 }

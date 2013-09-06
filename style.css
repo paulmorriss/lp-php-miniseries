@@ -13,3 +13,11 @@ body {
 	line-height: 1.4em;
 }
 
+.topwords {
+	text-align:center;
+}
+
+.subdued {
+	font-size:smaller;
+	text-align:center;
+}

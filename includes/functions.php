@@ -87,8 +87,6 @@ function lp_display_page() {
 	// Work out whether this is a regular edition, or the sample, and what 
 	// edition to show (if any).
 	if ($directory_name == 'edition') {
-		$edition_number = (int) $_GET['delivery_count'] + 1;
-		lp_etag_header($edition_number, $local_delivery_time);
 
 		// Which weekday is this Little Printer on?
 		$weekday = lp_day_of_week($local_delivery_time);
@@ -98,19 +96,43 @@ function lp_display_page() {
 			http_response_code(204);
 			exit;
 		}
-
+		$url = BBCRSS . $_GET['postcode']. BBCSUFFIX;
 	} else { // 'sample'
 		$edition_number = $EDITION_FOR_SAMPLE;
-		lp_etag_header('sample', $local_delivery_time);
+		$url = BBCRSS . SAMPLE_POSTCODE . BBCSUFFIX;
 	}
-	$rss = fetch_rss("http://newsrss.bbc.co.uk/weather/forecast/4276/Next3DaysRSS.xml?area=HP12");
+	// Fetch the weather and get the word from the first item
+	$rss = fetch_rss($url);
+	
+	//Emit the unique etag
+	lp_etag_header($rss->items[0]['pubdate'], $local_delivery_time);
+	header("Content-Type: text/html; charset=utf-8");
+	
 	$weatherword = $rss->items[0]['title'];
+	$dayname = substr($weatherword, 0, strpos($weatherword,":"));
 	$weatherword = substr($weatherword, strpos($weatherword,":")+2);
-	$weatherword = substr($weatherword, 0, strpos($weatherword, ","));
-	echo file_get_contents(lp_directory_path().'editions/'.$weatherword.'.svg');
+	// Get the text after the word, includes temperatures
+	$extratext = substr($weatherword, strpos($weatherword, ",")+1);
+	//	RSS parser converts entities, so we have to put them back so they get interpreted properly by the browser
+	$extratext = htmlentities($extratext);
+	// Get the actual word
+	$weatherword = strtolower(substr($weatherword, 0, strpos($weatherword, ",")));
+	
+	//Display the contents of the corresponding png file
 	lp_page_header();
-
 	require lp_directory_path().'includes/header.php';	
+echo $rss->items[0]['pubdate'];
+	echo '<div class="topwords"><p>'.$dayname.'<br>'.$extratext.'<br>'.$weatherword.'</p></div>';
+	// SVG not supported, otherwise we'd do this
+	//echo file_get_contents(lp_directory_path().'editions/'.$weatherword.'.svg');
+
+//TODO check if file exists for weatherword, otherwise displays whoops.png
+	if (file_exists(lp_directory_path().'editions/'.$weatherword.'.png')) {
+		echo '<img class="dither" src="http://'.$_SERVER['SERVER_NAME'].lp_directory_url().'editions/'.$weatherword.'.png'.'" />';
+	} else {
+		echo '<img class="dither" src="http://'.$_SERVER['SERVER_NAME'].lp_directory_url().'editions/whoops.png'.'" />';
+	}
+		
 	require lp_directory_path().'includes/footer.php';	
 
 	lp_page_footer();
@@ -158,17 +180,15 @@ function lp_check_parameters() {
 		lp_fatal_error("This can only be run from either the 'edition' or 'sample' directories, but this is in '$directory_name'.");
 	}
 	if ($directory_name == 'edition') {
-		if ( ! array_key_exists('delivery_count', $_GET)) {
-			// Sending an ETag shouldn't really be necessary at /edition/ with 
-			// no parameters, but the publication validator currently queries 
-			// that URL and expects an ETag.
-			lp_etag_header('delivery_count_error', gmdate('Y-m-d\TH:i:s.0+00:00'));
+		//Check for required postcode
+		if ( ! array_key_exists('postcode', $_GET)) {
+			lp_etag_header('postcode_error', gmdate('Y-m-d\TH:i:s.0+00:00'));
 			lp_fatal_error(
-				"Requests for /edition/ need a delivery_count, eg '?delivery_count=0'",
-				"Make sure 'send_delivery_count' is set to true in meta.json"	
+				"Requests for /edition/ need a postcode, eg '?postcode=HP12'"	
 			);
 		}
 	}
+
 }
 
 

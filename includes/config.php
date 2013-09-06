@@ -21,4 +21,7 @@ $DELIVERY_DAYS = array(
 	'sunday',
 );
 
+define ("BBCRSS","http://open.live.bbc.co.uk/weather/feeds/en/");
+define ("BBCSUFFIX", "/3dayforecast.rss");
+define ("SAMPLE_POSTCODE", "HP12");
 ?>
