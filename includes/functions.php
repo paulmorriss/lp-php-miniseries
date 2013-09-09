@@ -42,27 +42,17 @@ function lp_page_footer() {
 
 /**
  * Generates the HTML for the whole page, for both /edition/ and /sample/.
+ * Reads the BBC RSS feed for the given postcode and then prints out
+ * the day, the weather description and a picture for the weather
+ * from the editions directory.
  *
- * It will display either the image, or include the HTML file in /editions/.
- *
- * If there is no more content to display for this delivery in the /editions/
- * directory, we return a status of 410 to show that this partwork is finished -
- * the subscriber will be unsubscribed from this publication.
- *
- * If called from /edition/ then we expect to receive two parameters in the 
+ * If called from /edition/ then we expect to receive one parameter in the 
  * URL:
- *
- * `delivery_count` 
- * This counts up from 0, and indicates which edition should be published. BERG 
- * Cloud increments this every time we return content. So if we don't deliver 
- * an edition on a particular day, deliver_count will be the same the next day.
- * This value determines which image or * HTML file we display.
- * eg, if delivery_count is 0, we display /editions/1.png or /editions/1.html
  *
  * `local_delivery_time`
  * This will contain the time in the timezone where the Little Printer we're
  * delivering to is based, eg "2013-07-31T19:20:30.45+01:00".
- * We use this to determine if it's the correct day for a delivery.
+ * We use this to determine if it's the correct day for a delivery. (Which it always is in this weather app
  */
 function lp_display_page() {
 	global $DELIVERY_DAYS, $EDITION_FOR_SAMPLE;
@@ -121,12 +111,11 @@ function lp_display_page() {
 	//Display the contents of the corresponding png file
 	lp_page_header();
 	require lp_directory_path().'includes/header.php';	
-echo $rss->items[0]['pubdate'];
 	echo '<div class="topwords"><p>'.$dayname.'<br>'.$extratext.'<br>'.$weatherword.'</p></div>';
 	// SVG not supported, otherwise we'd do this
 	//echo file_get_contents(lp_directory_path().'editions/'.$weatherword.'.svg');
 
-//TODO check if file exists for weatherword, otherwise displays whoops.png
+	//Check if file exists for weatherword, otherwise displays whoops.png
 	if (file_exists(lp_directory_path().'editions/'.$weatherword.'.png')) {
 		echo '<img class="dither" src="http://'.$_SERVER['SERVER_NAME'].lp_directory_url().'editions/'.$weatherword.'.png'.'" />';
 	} else {
@@ -137,32 +126,6 @@ echo $rss->items[0]['pubdate'];
 
 	lp_page_footer();
 	
-	// Get the path of the image or file for this edition (if any).
-/*	$file_path_data = lp_get_edition_file_path($edition_number);
-
-	if ($file_path_data === FALSE) {
-		// No edition is available for this edition_number. End the subscription.
-		http_response_code(410);
-		exit;
-	
-	} else {
-		// We have content to display!
-
-		lp_page_header();
-
-		require lp_directory_path().'includes/header.php';	
-
-		if ($file_path_data[0] == 'image') {
-			echo '<img src="' . $file_path_data[1] . '" />';
-		} else { // 'file'
-			require $file_path_data[1];
-		}
-
-		require lp_directory_path().'includes/footer.php';	
-
-		lp_page_footer();
-	}
-	*/
 }
 
 
